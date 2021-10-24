@@ -1,0 +1,7 @@
+<resources>
+
+    <string name="theme_state">Themes State</string>
+    <string name="please_wait">Please wait…</string>
+    <integer name="dark_theme_state">1</integer>
+    <integer name="light_theme_state">2</integer>
+</resources>

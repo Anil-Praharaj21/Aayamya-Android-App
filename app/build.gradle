@@ -1,0 +1,99 @@
+plugins {
+    id 'com.android.application'
+}
+
+def keystorePropertiesFile = rootProject.file(System.getenv('AAYAMYA_TECH_PROPERTIES'))
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+def jsonKeystorePropertiesFile = rootProject.file(keystoreProperties['JSON_PATH'].toString())
+def jsonKeystoreProperties = new Properties()
+jsonKeystoreProperties.load(new FileInputStream(jsonKeystorePropertiesFile))
+
+android {
+    compileSdkVersion 31
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        applicationId "com.aayamyatech.aayamya"
+        minSdkVersion 23
+        targetSdkVersion 31
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties['RELEASE_STORE_FILE'])
+            storePassword keystoreProperties['RELEASE_STORE_PASSWORD']
+            keyAlias keystoreProperties['RELEASE_KEY_ALIAS']
+            keyPassword keystoreProperties['RELEASE_KEY_PASSWORD']
+        }
+    }
+
+    flavorDimensions "aayamya"
+
+    productFlavors {
+        beta {
+            applicationId = "com.aayamyatech.dynamo"
+            buildConfigField "boolean", "devFlag", "true"
+            resValue "string", "app_name", keystoreProperties['APP_NAME']
+            buildConfigField "String", "base_url", "\"" + keystoreProperties['BASE_URL'] + "\""
+            buildConfigField "String", "random", "\"" + keystoreProperties['JSON_ENCRYPT'] + "\""
+            buildConfigField "String", "properties", "\"" + keystoreProperties['JSON_ENCRYPT'] + jsonKeystoreProperties['JSON_VALUE'] + keystoreProperties['JSON_ENCRYPT'] + "\""
+//            manifestPlaceholders = [
+//                    appIcon: keystoreProperties['APP_ICON'],
+//                    appIconRound: keystoreProperties['APP_ICON_ROUND']
+//            ]
+        }
+
+        clientBeta {
+            applicationId = "com.aayamyatech.clientbeta"
+            buildConfigField "boolean", "devFlag", "true"
+            resValue "string", "app_name", keystoreProperties['APP_NAME']
+            buildConfigField "String", "base_url", "\"" + keystoreProperties['BASE_URL'] + "\""
+            buildConfigField "String", "random", "\"" + keystoreProperties['JSON_ENCRYPT'] + "\""
+            buildConfigField "String", "properties", "\"" + jsonKeystoreProperties['JSON_VALUE'] + "\""
+        }
+
+        clientProd {
+            applicationId = "com.aayamyatech.clientprod"
+            buildConfigField "boolean", "devFlag", "false"
+            resValue "string", "app_name", keystoreProperties['APP_NAME']
+            buildConfigField "String", "base_url", "\"" + keystoreProperties['BASE_URL'] + "\""
+            buildConfigField "String", "random", "\"" + keystoreProperties['JSON_ENCRYPT'] + "\""
+            buildConfigField "String", "properties", "\"" + jsonKeystoreProperties['JSON_VALUE'] + "\""
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "${keystoreProperties['APK_NAME']}_${defaultConfig.versionName}.apk"
+        }
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+}
